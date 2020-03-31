@@ -2,3 +2,5 @@ access/*
 src/access/*
 venv/*
 covidWorkspace.code-workspace
+src/data/*
+!src/data/.gitkeep
