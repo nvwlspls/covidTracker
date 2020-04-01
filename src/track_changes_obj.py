@@ -21,7 +21,7 @@ class TrackCovidChanges():
         data_files_exist = self.check_for_data_files()
 
         if not data_files_exist:
-            pass
+            self.create_default_data()
 
         # if check is false 
             # create the files
@@ -110,6 +110,8 @@ class TrackCovidChanges():
 
         # close files
         f.close()
+        
+        return output_dict
         
     def get_curr_data(self):
         
