@@ -11,8 +11,8 @@ class TrackCovidChanges():
     def __init__(self):
         super().__init__()
         self.url = \
-        'https://www.sandiegocounty.gov/content/sdc/hhsa/programs/phs/\
-        community_epidemiology/dc/2019-nCoV/status.html'
+        'https://www.sandiegocounty.gov/content/sdc/hhsa/programs/phs/' + \
+        'community_epidemiology/dc/2019-nCoV/status.html'
         self.data_dir = os.path.join(os.getcwd(), "data")
 
     def track_changes(self):
@@ -71,7 +71,9 @@ class TrackCovidChanges():
 
         get the current etag header
         """
-        pass
+
+        return requests.head(self.url).headers['Etag']
+
 
     def check_for_data_files(self):
         """
