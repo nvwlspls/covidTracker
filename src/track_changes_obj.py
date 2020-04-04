@@ -1,6 +1,7 @@
 import os
 import requests
 import json
+import datetime
 from bs4 import BeautifulSoup
 
 class TrackCovidChanges():
@@ -20,12 +21,14 @@ class TrackCovidChanges():
         # check for data files
         data_files_exist = self.check_for_data_files()
 
+
+        # if check is false create the files 
         if not data_files_exist:
             self.create_default_data()
-
-        # if check is false 
-            # create the files
         
+        # read data
+        data_file  = os.pthat.join(self.data_dir, "covid_data.json")
+        old_data = json.load("")
         # read the etag data from the files
         
         # get the curr etag from the site
@@ -53,22 +56,24 @@ class TrackCovidChanges():
             # pass
         pass
     
-    def get_min_date(self):
+    def get_max_date(self, data_dict):
         """
-        get the min date from the data keys
-        """     
-
+        get the max date from the data keys
+        """
+        
+        return max(list(data_dict.keys()))
+        
     def create_key_timestamp(self):
         """
         create a timestamp that will be used for the key
         example "2020-03-30-1600"
         """
         
-        pass
+        return datetime.datetime.now().strftime("%Y-%m-%d-%H%M")
+
 
     def get_curr_etag_header(self):
         """
-
         get the current etag header
         """
 
@@ -80,32 +85,39 @@ class TrackCovidChanges():
         Check the data dir for default files
         """
         
-        self.data_dir_files = os.listdir(data_dir)
+        data_dir_files = os.listdir(self.data_dir)
         
         if "covid_data.json" not in data_dir_files:
             return False
         
         return True
 
+
+    def load_data(self):
+        """
+        load the current data
+        """
+        pass
+
     def create_default_data(self):
         
         """
         Create the default files and populate them with generic data
         """
+
         # get current data
         curr_data_dict = self.get_curr_data()
         curr_etag = self.get_curr_etag_header()
-        curr_data_dict.update(curr_etag)
-
-        # get timestamp
         timestamp = self.create_key_timestamp()
 
+        curr_data_dict["ETag"] = curr_etag
+        
         # create dict for file
         output_dict = {}
         output_dict[timestamp] = curr_data_dict
 
         # open files
-        f = open(os.path.join(self.data_dir, "covid_data.json", "w+"))
+        f = open(os.path.join(self.data_dir, "covid_data.json"), "w+")
         
         # write current data to file
         json.dump(output_dict, f)
@@ -119,12 +131,14 @@ class TrackCovidChanges():
         
         curr_page = requests.get(self.url)
         soup = BeautifulSoup(curr_page.content, 'html.parser')
-        case_num = int(soup.select(".table > table:nth-child(1) > \
-        tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > \
-         b:nth-child(1)")[0].text)
-        death_num = int(soup.select(".table > table:nth-child(1) > \
-        tbody:nth-child(1) > tr:nth-child(21) > td:nth-child(2)").text)
 
+        case_num = int(soup.select(".table > table:nth-child(1) > " +
+        "tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > " +
+         "b:nth-child(1)")[0].text.replace(",", ""))
+        
+        death_num = int(soup.select(".table > table:nth-child(1) >" + \
+            " tbody:nth-child(1) > tr:nth-child(21) > td:nth-child(2)")[0].text)
+        
         # create data dict
         data_dict = {}
         data_dict["case_num"] = case_num
