@@ -3,6 +3,9 @@ import requests
 import json
 import datetime
 from bs4 import BeautifulSoup
+from twilio.rest import Client
+from access.access import SPI, AUTH_TOKEN, TEST_NUMBERS
+
 
 class TrackCovidChanges():
     """
@@ -15,9 +18,10 @@ class TrackCovidChanges():
         'https://www.sandiegocounty.gov/content/sdc/hhsa/programs/phs/' + \
         'community_epidemiology/dc/2019-nCoV/status.html'
         self.data_dir = os.path.join(os.getcwd(), "data")
+        self.data_file = os.path.join(self.data_dir, 'covid_data.json')
 
     def track_changes(self):
-        
+
         # check for data files
         data_files_exist = self.check_for_data_files()
 
@@ -25,37 +29,71 @@ class TrackCovidChanges():
         # if check is false create the files 
         if not data_files_exist:
             self.create_default_data()
-        
+
         # read data
-        data_file  = os.pthat.join(self.data_dir, "covid_data.json")
-        old_data = json.load("")
-        # read the etag data from the files
-        
-        # get the curr etag from the site
-        
+        import pdb; pdb.set_trace();
+        data_file  = open(self.data_file, 'r')
+        old_data = json.load(data_file)
+        data_file.close()
+
+        # get max data to get latest data result
+        latest_date = self.get_max_date(old_data)
+                
         # if new etag != old etag
+        if old_data[latest_date]['etag'] != self.get_curr_etag_header():
+            
+            current_timestamp = self.create_key_timestamp()
+            current_data = self.get_curr_data()
+
             # get the old case num
+            old_case_num = old_data[latest_date]['case_num']
             # get the old death num
+            old_death_num = old_data[latest_date]['death_num']
 
             # get the curr case num
+            curr_case_num = current_data['case_num']
             # get the curr death num
+            curr_death_num = current_data['death_num']
 
-            # new cases = curr case num - old case num
-            # new deaths = curr death num - old death num
+            # new cases / deaths
+            new_cases = curr_case_num - old_case_num
+            new_deaths = curr_death_num - old_death_num
 
             # save data to file
+            old_data[current_timestamp] = current_data
+            
+            data_file = open(self.data_file, 'w+')
+            json.dumps(old_data, data_file)
+            
             # close file
+            data_file.close()
 
             # compose message
-
+            message_text = "San Diego County reported {} new cases f COVID19" +\
+                " and {} new deaths. Source: https://bit.ly/2V0Havj"
             # send message
-
-            #
 
         # else:
             # pass
         pass
     
+        def send_text_message(self, text, numbers):
+            """
+            Send text message 
+            """
+
+            client = Client(SPI, AUTH_TOKEN)
+            # send message
+            for number in TEST_NUMBERS:
+
+                message = client.messages \
+                        .create(
+                                body=text,
+                                from_='+12028901613',
+                                to=number
+                            )
+
+
     def get_max_date(self, data_dict):
         """
         get the max date from the data keys
@@ -110,14 +148,14 @@ class TrackCovidChanges():
         curr_etag = self.get_curr_etag_header()
         timestamp = self.create_key_timestamp()
 
-        curr_data_dict["ETag"] = curr_etag
+        curr_data_dict["etag"] = curr_etag
         
         # create dict for file
         output_dict = {}
         output_dict[timestamp] = curr_data_dict
 
         # open files
-        f = open(os.path.join(self.data_dir, "covid_data.json"), "w+")
+        f = open(self.data_file, "w+")
         
         # write current data to file
         json.dump(output_dict, f)
@@ -145,6 +183,11 @@ class TrackCovidChanges():
         data_dict["death_num"] = death_num
         
         return data_dict
+
+
+apples = TrackCovidChanges()
+
+apples.track_changes()
 
 """
 example data structure
