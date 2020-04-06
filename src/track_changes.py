@@ -23,13 +23,13 @@ while True:
         diff = this_num -  COVID_NUM
         COVID_NUM = this_num
 
-        message = "San Diego has reported {} new Coronvavirus cases today.  The total is now {}".format(diff, this_num)
-
-        message = client.messages \
-                .create(
-                     body=message,
-                     from_='+12028901613',
-                     to=PHONE_NUMBER
-                 )
+        text = "San Diego has reported {} new Coronvavirus cases today.  The total is now {}".format(diff, this_num)
+        for number in PHONE_NUMBER:
+            message = client.messages \
+                    .create(
+                         body=text,
+                         from_='+12028901613',
+                        to=number
+                     )
     
     time.sleep(60)
