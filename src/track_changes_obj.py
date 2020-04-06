@@ -26,7 +26,6 @@ class TrackCovidChanges():
         # check for data files
         data_files_exist = self.check_for_data_files()
 
-
         # if check is false create the files 
         if not data_files_exist:
             self.create_default_data()
@@ -184,6 +183,7 @@ class TrackCovidChanges():
         data_dict = {}
         data_dict["case_num"] = case_num
         data_dict["death_num"] = death_num
+        data_dict["etag"] = self.get_curr_etag_header()
         
         return data_dict
 
