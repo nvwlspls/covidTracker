@@ -20,7 +20,7 @@ class TrackCovidChanges():
         'community_epidemiology/dc/2019-nCoV/status.html'
         self.data_dir = os.path.join(os.getcwd(), "data")
         self.data_file = os.path.join(self.data_dir, 'covid_data.json')
-
+        
     def track_changes(self):
 
         # check for data files
@@ -184,7 +184,7 @@ class TrackCovidChanges():
         data_dict["case_num"] = case_num
         data_dict["death_num"] = death_num
         data_dict["etag"] = self.get_curr_etag_header()
-        
+
         return data_dict
 
 
