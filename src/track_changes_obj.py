@@ -70,9 +70,10 @@ class TrackCovidChanges():
             data_file.close()
 
             # compose message
-            message_text = "San Diego County reported {} new cases of " + \
+            message_text = "San Diego County reported {} new cases of " \
+                           "".format(new_cases) + \
             "COVID19 and {} new deaths. Source: https://bit.ly/2V0Havj".\
-                    format(new_cases, new_deaths)
+                    format(new_deaths)
             
             # send messages
             self.send_text_messages(message_text, PHONE_NUMBERS)
@@ -114,7 +115,7 @@ class TrackCovidChanges():
 
     def get_curr_etag_header(self):
         """
-        get the current etag header
+        get the current etag header/
         """
 
         return requests.head(self.url).headers['Etag']
