@@ -6,6 +6,7 @@ from bs4 import BeautifulSoup
 from twilio.rest import Client
 from access.access import SPI, AUTH_TOKEN, TEST_NUMBERS
 
+PHONE_NUMBERS = TEST_NUMBERS
 
 class TrackCovidChanges():
     """
@@ -31,7 +32,6 @@ class TrackCovidChanges():
             self.create_default_data()
 
         # read data
-        import pdb; pdb.set_trace();
         data_file  = open(self.data_file, 'r')
         old_data = json.load(data_file)
         data_file.close()
@@ -62,36 +62,38 @@ class TrackCovidChanges():
             # save data to file
             old_data[current_timestamp] = current_data
             
+            # open datafile and overwrite contents
             data_file = open(self.data_file, 'w+')
-            json.dumps(old_data, data_file)
+            json.dump(old_data, data_file)
             
             # close file
             data_file.close()
 
             # compose message
-            message_text = "San Diego County reported {} new cases f COVID19" +\
-                " and {} new deaths. Source: https://bit.ly/2V0Havj"
-            # send message
+            message_text = "San Diego County reported {} new cases of " + \
+            "COVID19 and {} new deaths. Source: https://bit.ly/2V0Havj".\
+                    format(new_cases, new_deaths)
+            
+            # send messages
+            self.send_text_messages(message_text, PHONE_NUMBERS)
 
-        # else:
-            # pass
         pass
-    
-        def send_text_message(self, text, numbers):
-            """
-            Send text message 
-            """
 
-            client = Client(SPI, AUTH_TOKEN)
-            # send message
-            for number in TEST_NUMBERS:
+    def send_text_messages(self, text, numbers):
+        """
+        Send text messages
+        """
 
-                message = client.messages \
-                        .create(
-                                body=text,
-                                from_='+12028901613',
-                                to=number
-                            )
+        client = Client(SPI, AUTH_TOKEN)
+        # send message
+        for number in TEST_NUMBERS:
+
+            message = client.messages \
+                    .create(
+                            body=text,
+                            from_='+12028901613',
+                            to=number
+                        )
 
 
     def get_max_date(self, data_dict):
