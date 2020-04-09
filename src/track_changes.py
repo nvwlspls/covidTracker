@@ -53,7 +53,7 @@ if curr_etag != change_data:
         case_data = {}
         case_data['total_cases'] = case_num
         
-
+    
 
 # data dir
 data_dir = os.path.join(os.getcwd(), 'data')
