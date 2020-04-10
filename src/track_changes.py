@@ -52,8 +52,19 @@ if curr_etag != change_data:
     except JSONDecodeError:
         case_data = {}
         case_data['total_cases'] = case_num
-        
+        diff = this_num -  COVID_NUM
+        COVID_NUM = this_num
+
+        text = "San Diego has reported {} new Coronvavirus cases today.  The total is now {}".format(diff, this_num)
+        for number in PHONE_NUMBER:
+            message = client.messages \
+                    .create(
+                         body=text,
+                         from_='+12028901613',
+                        to=number
+                     )
     
+    time.sleep(60)
 
 # data dir
 data_dir = os.path.join(os.getcwd(), 'data')
@@ -72,4 +83,3 @@ message = client.messages \
                 body=text,
                 from_='+12028901613',
                 to=PHONE_NUMBER
-            )
