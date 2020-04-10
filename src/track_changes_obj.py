@@ -37,45 +37,43 @@ class TrackCovidChanges():
 
         # get max data to get latest data result
         latest_date = self.get_max_date(old_data)
-                
-        # if new etag != old etag
+
+        # if new etag != old etag, do the full request
         if old_data[latest_date]['etag'] != self.get_curr_etag_header():
-            
-            current_timestamp = self.create_key_timestamp()
-            current_data = self.get_curr_data()
 
             # get the old case num
             old_case_num = old_data[latest_date]['case_num']
             # get the old death num
             old_death_num = old_data[latest_date]['death_num']
 
-            # get the curr case num
-            curr_case_num = current_data['case_num']
-            # get the curr death num
-            curr_death_num = current_data['death_num']
+            current_timestamp = self.create_key_timestamp()
+            current_data = self.get_curr_data()
 
-            # new cases / deaths
-            new_cases = curr_case_num - old_case_num
-            new_deaths = curr_death_num - old_death_num
+            new_cases_reported = current_data["case_num"] - old_data[
+                latest_date]['case_num']
+            new_deaths_reported = current_data["death_num"] - old_data[
+                latest_date]['death_num']
 
-            # save data to file
-            old_data[current_timestamp] = current_data
-            
-            # open datafile and overwrite contents
-            data_file = open(self.data_file, 'w+')
-            json.dump(old_data, data_file)
-            
-            # close file
-            data_file.close()
+            if (new_cases_reported > 0) or (new_deaths_reported > 0):
 
-            # compose message
-            message_text = "San Diego County reported {} new cases of " \
-                           "".format(new_cases) + \
-            "COVID19 and {} new deaths. Source: https://bit.ly/2V0Havj".\
-                    format(new_deaths)
-            
-            # send messages
-            self.send_text_messages(message_text, PHONE_NUMBERS)
+                # save data to file
+                old_data[current_timestamp] = current_data
+
+                # open datafile and overwrite contents
+                data_file = open(self.data_file, 'w+')
+                json.dump(old_data, data_file)
+
+                # close file
+                data_file.close()
+
+                # compose message
+                message_text = "San Diego County reported {} new cases of " \
+                               "".format(new_cases_reported) + \
+                "COVID19 and {} new deaths. Source: https://bit.ly/2V0Havj".\
+                        format(new_deaths_reported)
+
+                # send messages
+                self.send_text_messages(message_text, PHONE_NUMBERS)
 
         pass
 
@@ -180,10 +178,8 @@ class TrackCovidChanges():
             " tbody:nth-child(1) > tr:nth-child(21) > td:nth-child(2)")[0].text)
         
         # create data dict
-        data_dict = {}
-        data_dict["case_num"] = case_num
-        data_dict["death_num"] = death_num
-        data_dict["etag"] = self.get_curr_etag_header()
+        data_dict = {"case_num": case_num, "death_num": death_num,
+                     "etag": self.get_curr_etag_header()}
 
         return data_dict
 

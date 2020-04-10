@@ -4,3 +4,6 @@ venv/*
 covidWorkspace.code-workspace
 src/data/*
 !src/data/.gitkeep
+.idea/*
+.vscode/*
+src/__pycache__/
