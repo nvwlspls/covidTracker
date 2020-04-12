@@ -67,13 +67,17 @@ class TrackCovidChanges():
                 data_file.close()
 
                 # compose message
-                message_text = "San Diego County reported {} new cases of " \
-                               "".format(new_cases_reported) + \
-                "COVID19 and {} new deaths. Source: https://bit.ly/2V0Havj".\
-                        format(new_deaths_reported)
+                message_text = "San Diego County reported {} new cases ({} " \
+                               "total) of ".format(new_cases_reported,
+                                                   current_data["case_num"]) + \
+                "COVID19 and {} new deaths ({} total). Source: " \
+                "https://bit.ly/2V0Havj".format(new_deaths_reported,
+                                                current_data["death_num"])
 
                 # send messages
                 self.send_text_messages(message_text, PHONE_NUMBERS)
+                
+                print("message sent at {}".format(current_timestamp))
 
         pass
 
