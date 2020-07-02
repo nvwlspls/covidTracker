@@ -31,12 +31,12 @@ class TrackCovidChanges():
             self.create_default_data()
 
         # read data
-        data_file  = open(self.data_file, 'r')
+        data_file = open(self.data_file, 'r')
         old_data = json.load(data_file)
         data_file.close()
 
         # get max data to get latest data result
-        latest_date = self.get_max_date(old_data)
+        latest_date = self.get_max_date(self, old_data)
 
         # if new etag != old etag, do the full request
         if old_data[latest_date]['etag'] != self.get_curr_etag_header():
@@ -46,7 +46,7 @@ class TrackCovidChanges():
             # get the old death num
             old_death_num = old_data[latest_date]['death_num']
 
-            current_timestamp = self.create_key_timestamp()
+            current_timestamp = self.create_key_timestamp(self)
             current_data = self.get_curr_data()
 
             new_cases_reported = current_data["case_num"] - old_data[
@@ -74,21 +74,24 @@ class TrackCovidChanges():
                 "https://bit.ly/2V0Havj".format(new_deaths_reported,
                                                 current_data["death_num"])
 
+
+
                 # send messages
-                self.send_text_messages(message_text, PHONE_NUMBERS)
+                self.send_text_messages(message_text, TEST_NUMBERS)
                 
                 print("message sent at {}".format(current_timestamp))
 
         pass
 
-    def send_text_messages(self, text, numbers):
+    @staticmethod
+    def send_text_messages(text, numbers):
         """
         Send text messages
         """
 
         client = Client(SPI, AUTH_TOKEN)
         # send message
-        for number in TEST_NUMBERS:
+        for number in numbers:
 
             message = client.messages \
                     .create(
@@ -97,14 +100,15 @@ class TrackCovidChanges():
                             to=number
                         )
 
-
+    @staticmethod
     def get_max_date(self, data_dict):
         """
         get the max date from the data keys
         """
         
         return max(list(data_dict.keys()))
-        
+
+    @staticmethod
     def create_key_timestamp(self):
         """
         create a timestamp that will be used for the key
@@ -113,14 +117,12 @@ class TrackCovidChanges():
         
         return datetime.datetime.now().strftime("%Y-%m-%d-%H%M")
 
-
     def get_curr_etag_header(self):
         """
         get the current etag header/
         """
 
         return requests.head(self.url).headers['Etag']
-
 
     def check_for_data_files(self):
         """
@@ -133,7 +135,6 @@ class TrackCovidChanges():
             return False
         
         return True
-
 
     def load_data(self):
         """
@@ -177,10 +178,11 @@ class TrackCovidChanges():
         case_num = int(soup.select(".table > table:nth-child(1) > " +
         "tbody:nth-child(1) > tr:nth-child(3) > td:nth-child(2) > " +
          "b:nth-child(1)")[0].text.replace(",", ""))
-        
+
         death_num = int(soup.select(".table > table:nth-child(1) >" + \
-            " tbody:nth-child(1) > tr:nth-child(21) > td:nth-child(2)")[0].text)
-        
+                " tbody:nth-child(1) > tr:nth-child(22) > td:nth-child(2)")[
+            0].text)
+
         # create data dict
         data_dict = {"case_num": case_num, "death_num": death_num,
                      "etag": self.get_curr_etag_header()}
