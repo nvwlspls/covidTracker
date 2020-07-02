@@ -1,0 +1,40 @@
+import os
+import requests
+import json
+import datetime
+from bs4 import BeautifulSoup
+from twilio.rest import Client
+from access.access import SPI, AUTH_TOKEN, TEST_NUMBERS
+
+
+def send_text_messages(text, numbers):
+    """
+    Send text messages
+    """
+
+    client = Client(SPI, AUTH_TOKEN)
+    # send message
+    for number in numbers:
+        message = client.messages \
+            .create(
+            body=text,
+            from_='+12028901613',
+            to=number
+        )
+
+
+if __name__ == "__main__":
+    """
+    I only want this to run once.  I will set the crontab to run once per day.
+    I should be able to take it off the server before it runs again, 
+    but just incase that doesn't happen I want to ensure that I don't bomb 
+    phones with the same message over and over
+    """
+
+    if datetime.datetime.now().strftime("%Y-%m-%d") == "2020-07-02":
+        message_text = "The death total from yesterdays message was " \
+                       "incorrect.  The actual number of new deaths " \
+                       "reported yesterday was 7 and the total is 372.  I " \
+                       "apologize for any panic attacks this may have caused."
+
+        send_text_messages(message_text, TEST_NUMBERS)
